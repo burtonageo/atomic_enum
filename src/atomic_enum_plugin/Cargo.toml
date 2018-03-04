@@ -1,0 +1,6 @@
+[package]
+name = "atomic_enum_plugin"
+version = "0.1.0"
+authors = ["George Burton <burtonageo@gmail.com>"]
+
+[dependencies]
