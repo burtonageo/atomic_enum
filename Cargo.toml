@@ -3,5 +3,7 @@ name = "atomic_enum"
 version = "0.1.0"
 authors = ["George Burton <burtonageo@gmail.com>"]
 
-[dependencies]
-static_assertions = "0.2.5"
+[features]
+default = ["std"]
+nightly = []
+std = []
