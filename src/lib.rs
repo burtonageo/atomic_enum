@@ -91,7 +91,7 @@ pub struct Atomic<E: AtomicEnum> {
 ///
 /// Only available on nightly.
 ///
-/// By default, this value will be the first variant of the enum annotated with `derive(AtomicEnum)`. To change this behavior, you can annotate
+/// By default, this value will be the first variant of the enum annotated with `#[derive(AtomicEnum)]`. To change this behavior, you can annotate
 /// another variant with the `#[atomic_enum_init]` attribute, as shown below.
 ///
 /// # Example
@@ -100,7 +100,7 @@ pub struct Atomic<E: AtomicEnum> {
 /// # fn main() {
 /// #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord, AtomicEnum)]
 /// #[repr(isize)]
-/// pub enum KeypadStatusCode {
+/// pub enum KeypadStatus {
 ///     OnFire = -1,
 ///     #[atomic_enum_init]
 ///     Operational = 0,
@@ -108,8 +108,8 @@ pub struct Atomic<E: AtomicEnum> {
 ///     KeyboardNotConnected = 2,
 /// }
 ///
-/// static MAIN_DOOR_KEYPAD_COMPUTER_STATUS: Atomic<KeypadStatusCode> = atomic_enum_new::<KeypadStatusCode>();
-/// assert_eq!(MAIN_DOOR_KEYPAD_COMPUTER_STATUS.load(Ordering::SeqCst), KeypadStatusCode::Operational);
+/// static DOOR_KEYPAD_STATUS: Atomic<KeypadStatus> = atomic_enum_new::<KeypadStatus>();
+/// assert_eq!(DOOR_KEYPAD_STATUS.load(Ordering::SeqCst), KeypadStatus::Operational);
 /// # }
 /// ```
 #[cfg(feature = "nightly")]
@@ -340,6 +340,12 @@ impl<'a, E: AtomicEnum + fmt::Debug> fmt::Debug for Mut<'a, E> {
     }
 }
 
+impl<'a, E: AtomicEnum + fmt::Display> fmt::Display for Mut<'a, E> {
+    fn fmt(&self, fmtr: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(self.deref(), fmtr)
+    }
+}
+
 impl<'a, E> Hash for Mut<'a, E>
 where
     E: AtomicEnum + Hash,
@@ -436,9 +442,13 @@ pub trait AtomicEnumRepr {
     fn load(&self, order: Ordering) -> Self::BaseInteger;
     /// Corresponds to `Atomic::store`.
     fn store(&self, val: Self::BaseInteger, order: Ordering);
+    /// Corresponds to `Atomic::swap`.
     fn swap(&self, val: Self::BaseInteger, order: Ordering) -> Self::BaseInteger;
+    /// Corresponds to `Atomic::compare_and_swap`.
     fn compare_and_swap(&self, current: Self::BaseInteger, new: Self::BaseInteger, order: Ordering) -> Self::BaseInteger;
+    /// Corresponds to `Atomic::compare_exchange`.
     fn compare_exchange(&self, current: Self::BaseInteger, new: Self::BaseInteger, success: Ordering, failure: Ordering) -> Result<Self::BaseInteger, Self::BaseInteger>;
+    /// Corresponds to `Atomic::compare_exchange_weak`.
     fn compare_exchange_weak(&self, current: Self::BaseInteger, new: Self::BaseInteger, success: Ordering, failure: Ordering) -> Result<Self::BaseInteger, Self::BaseInteger>;
 }
 
